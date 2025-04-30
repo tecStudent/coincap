@@ -1,5 +1,6 @@
 import os
 import logging
+import pandas as pd
 
 from dotenv import load_dotenv
 from pandas import DataFrame
@@ -77,3 +78,26 @@ def drop_table(
         logger.exception("Erro ao remover tabela '%s': %s", table_name, e)
         raise
 
+def read_table(
+    table_name: str,
+    schema: str | None = None,
+) -> DataFrame:
+    """
+    Lê toda a tabela especificada e retorna um DataFrame.
+
+    Parâmetros:
+    - table_name: nome da tabela a ler.
+    - schema: schema onde a tabela está (opcional).
+    """
+    engine = get_engine()
+    try:
+        df = pd.read_sql_table(
+            table_name,
+            con=engine,
+            schema=schema
+        )
+        logger.info("Tabela '%s' lida com sucesso: %d registros.", table_name,len(df))
+        return df
+    except Exception as e:
+        logger.exception("Falha ao ler tabela '%s': %s", table_name, e)
+        raise
