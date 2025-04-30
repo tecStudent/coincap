@@ -1,0 +1,16 @@
+# Ambiente virtual
+venv/
+
+# Arquivos de ambiente
+.env
+
+# Python cache e artefatos
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Logs
+*.log
+
+# Arquivos do sistema
+.DS_Store
