@@ -70,6 +70,9 @@ def etl_history_coin(list_coin: list, endpoint: str, api_key: dict) -> DataFrame
             df['coin'] = coin
             dfs.append(df)
         df_final = pd.concat(dfs, axis=0, ignore_index=True)
+        
+        df_final = df_final.drop_duplicates(subset=['date', 'coin'])
+        
         logger.info("ETL de history_coin finalizado com %d registros", len(df_final))
         return df_final
     except Exception as err:

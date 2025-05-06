@@ -5,7 +5,11 @@ from .conection import read_table
 
 def display_price_evolution(DATABASE_URL: str):
     df = read_table("history_coin", DATABASE_URL=DATABASE_URL)
+    
     df['date'] = pd.to_datetime(df['date'])
+    
+    df = df.drop_duplicates(subset=['date', 'coin'])
+    
     df = df.sort_values('date')
 
     start_date, end_date = st.date_input(
@@ -24,14 +28,19 @@ def display_price_evolution(DATABASE_URL: str):
         (df['coin'].isin(selected_coins))
     )
     df_filtrado = df.loc[mask]
-
-    df_wide = (
-        df_filtrado
-        .pivot(index='date', columns='coin', values='priceUsd')
-        .fillna(method='ffill')
-    )
-    st.subheader("Evolução de Preço")
-    st.line_chart(df_wide, use_container_width=True)
+    
+    if not df_filtrado.empty:
+        df_wide = df_filtrado.pivot_table(
+            index='date', 
+            columns='coin', 
+            values='priceUsd',
+            aggfunc='mean' 
+        ).fillna(method='ffill')
+        
+        st.subheader("Evolução de Preço")
+        st.line_chart(df_wide, use_container_width=True)
+    else:
+        st.info("Nenhum dado disponível para o período e moedas selecionados.")
 
 
 def display_pct_nao_emitida(DATABASE_URL: str):
