@@ -1,5 +1,5 @@
 # Radar Cripto
-
+kkkkk
 Este projeto é uma dashboard de visualização e análise de criptomoedas construído com Python e Streamlit. Ele consome dados da API CoinCap, armazena-os em um banco PostgreSQL e exibe gráficos e tabelas interativas.
 
 ## Estrutura do Projeto
