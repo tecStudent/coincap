@@ -1,6 +1,7 @@
 import os
 import json
 import pandas as pd
+import streamlit as st
 
 from dotenv import load_dotenv
 from utils.ingestion import etl_rank_coin, get_top_5, etl_history_coin
@@ -60,5 +61,33 @@ def run_etl():
         create_table(df=df_hist, table_name="history_coin", DATABASE_URL=DATABASE_URL, if_exists="fail")
 
 
-run_etl()
+def has_required_tables() -> bool:
+    rank_exists = check_table_exists("rank_coin", DATABASE_URL=DATABASE_URL)
+    hist_exists = check_table_exists("history_coin", DATABASE_URL=DATABASE_URL)
+    return rank_exists and hist_exists
+
+
+def refresh_data() -> None:
+    run_etl()
+    st.cache_data.clear()
+
+
+st.set_page_config(page_title="Radar Cripto", layout="wide")
+
+st.sidebar.title("Controle de Dados")
+
+if st.sidebar.button("Atualizar dados", type="primary", use_container_width=True):
+    with st.spinner("Atualizando dados da CoinCap e sincronizando com o banco..."):
+        refresh_data()
+    st.sidebar.success("Dados atualizados com sucesso.")
+
+if not has_required_tables():
+    st.warning("As tabelas da dashboard ainda não existem no banco.")
+    if st.button("Carga inicial de dados", type="primary"):
+        with st.spinner("Executando carga inicial..."):
+            refresh_data()
+        st.success("Carga inicial concluída.")
+        st.rerun()
+    st.stop()
+
 render_dashboard(DATABASE_URL=DATABASE_URL)
