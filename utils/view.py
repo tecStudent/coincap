@@ -3,8 +3,13 @@ import pandas as pd
 from .conection import read_table 
 
 
+@st.cache_data(ttl=300, show_spinner=False)
+def load_table(table_name: str, DATABASE_URL: str) -> pd.DataFrame:
+    return read_table(table_name, DATABASE_URL=DATABASE_URL)
+
+
 def display_price_evolution(DATABASE_URL: str):
-    df = read_table("history_coin", DATABASE_URL=DATABASE_URL)
+    df = load_table("history_coin", DATABASE_URL=DATABASE_URL)
     
     df['date'] = pd.to_datetime(df['date'])
     
@@ -35,7 +40,7 @@ def display_price_evolution(DATABASE_URL: str):
             columns='coin', 
             values='priceUsd',
             aggfunc='mean' 
-        ).fillna(method='ffill')
+        ).ffill()
         
         st.subheader("Evolução de Preço")
         st.line_chart(df_wide, use_container_width=True)
@@ -45,7 +50,7 @@ def display_price_evolution(DATABASE_URL: str):
 
 def display_pct_nao_emitida(DATABASE_URL: str):
 
-    df_rank = read_table("rank_coin", DATABASE_URL=DATABASE_URL)
+    df_rank = load_table("rank_coin", DATABASE_URL=DATABASE_URL)
     df_rank = df_rank.dropna(subset=['maxSupply']).copy()
     df_rank['pct_nao_emitida'] = (
         (df_rank['maxSupply'] - df_rank['supply']) / df_rank['maxSupply'] * 100
@@ -62,7 +67,7 @@ def display_pct_nao_emitida(DATABASE_URL: str):
 
 
 def display_metrics_table(DATABASE_URL: str):
-    df_rank = read_table("rank_coin", DATABASE_URL=DATABASE_URL)
+    df_rank = load_table("rank_coin", DATABASE_URL=DATABASE_URL)
     df_rank = df_rank.dropna(subset=['maxSupply']).copy()
     df_rank['pct_nao_emitida'] = (
         (df_rank['maxSupply'] - df_rank['supply']) / df_rank['maxSupply'] * 100
